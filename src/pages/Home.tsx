@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import HeroCarousel from '@/components/HeroCarousel';
 import DestinationCard from '@/components/DestinationCard';
 import Newsletter from '@/components/Newsletter';
+import PosterGrid from '@/components/PosterGrid';
 import { Button } from '@/components/ui/button';
 
 // Import destination images
@@ -41,21 +42,21 @@ const Home = () => {
       title: 'Mountain Adventures',
       location: 'East African Highlands',
       description: 'Explore breathtaking mountain landscapes with misty peaks and lush green valleys perfect for hiking and adventure.',
-      price: 'From $1,200',
+      price: 'From KShs 150,000',
     },
     {
       image: destIsland,
       title: 'Tropical Paradise',
       location: 'Indian Ocean Islands',
       description: 'Discover pristine beaches, crystal-clear waters, and vibrant coral reefs on exclusive island getaways.',
-      price: 'From $1,800',
+      price: 'From KShs 225,000',
     },
     {
       image: destCity,
       title: 'Cultural Heritage',
       location: 'Historic Cities',
       description: 'Immerse yourself in rich history and stunning architecture in ancient cities with cobblestone streets.',
-      price: 'From $900',
+      price: 'From KShs 112,000',
     },
   ];
 
@@ -65,21 +66,21 @@ const Home = () => {
       title: 'Coastal Village Retreat',
       location: 'Mediterranean Coast',
       description: 'Charming coastal villages with serene harbors and spectacular sunset views.',
-      price: 'From $1,500',
+      price: 'From KShs 187,000',
     },
     {
       image: destMountains,
       title: 'Highland Expedition',
       location: 'Mountain Ranges',
       description: 'Trek through stunning highland terrain with expert guides and premium camping.',
-      price: 'From $2,100',
+      price: 'From KShs 262,000',
     },
     {
       image: destIsland,
       title: 'Island Hopping Adventure',
       location: 'Archipelago',
       description: 'Discover multiple tropical islands with snorkeling, diving, and beach activities.',
-      price: 'From $2,400',
+      price: 'From KShs 300,000',
     },
   ];
 
@@ -169,6 +170,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Admin-Added Posters */}
+      <PosterGrid />
 
       {/* Newsletter Signup */}
       <Newsletter />

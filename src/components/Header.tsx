@@ -23,6 +23,7 @@ const Header = () => {
     { path: '/relocation-offers', label: 'Relocation & Offers' },
     { path: '/about', label: 'About' },
     { path: '/contact', label: 'Contact Us' },
+    { path: '/admin', label: 'Admin' },
   ];
 
   return (
@@ -43,7 +44,7 @@ const Header = () => {
                 Excursia Connect
               </h1>
               <p className={`text-xs ${isScrolled ? 'text-muted-foreground' : 'text-white/90'}`}>
-                epic travel. epic expectations.
+                Epic Travel. Epic Expectations.
               </p>
             </div>
           </Link>
