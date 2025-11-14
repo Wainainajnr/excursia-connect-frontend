@@ -38,7 +38,11 @@ const DestinationCard = ({ image, title, location, description, price, link = '#
         <Button 
           variant="outline" 
           className="w-full rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
-          onClick={() => window.location.href = link}
+          onClick={() => {
+            if (link && link !== '#') {
+              window.location.href = link;
+            }
+          }}
         >
           View Details
         </Button>
