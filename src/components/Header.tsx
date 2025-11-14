@@ -23,7 +23,6 @@ const Header = () => {
     { path: '/relocation-offers', label: 'Relocation & Offers' },
     { path: '/about', label: 'About' },
     { path: '/contact', label: 'Contact Us' },
-    { path: '/admin', label: 'Admin' },
   ];
 
   return (
@@ -68,7 +67,10 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-            <Button className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90">
+            <Button 
+              className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              onClick={() => window.location.href = '/contact'}
+            >
               Book Now
             </Button>
           </nav>
@@ -105,7 +107,10 @@ const Header = () => {
               </Link>
             ))}
             <div className="px-4">
-              <Button className="btn-pill w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
+              <Button 
+                className="btn-pill w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                onClick={() => window.location.href = '/contact'}
+              >
                 Book Now
               </Button>
             </div>

@@ -85,17 +85,17 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Visit Us',
-      details: '123 Travel Street, Nairobi, Kenya',
+      details: 'Spur Mall — 2nd Floor',
     },
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+254 700 000 000',
+      details: '0724415820',
     },
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'info@excursiaconnect.com',
+      details: 'karibu@excursiaconnect.com',
     },
     {
       icon: Clock,

@@ -71,13 +71,21 @@ const HeroCarousel = () => {
           {/* Content */}
           <div className="absolute inset-0 flex items-center justify-center text-center px-4">
             <div className="max-w-4xl animate-fade-in">
+              {index === 0 && (
+                <h1 className="text-3xl md:text-4xl font-heading font-semibold text-white/95 mb-4">
+                  Welcome to Excursia Connect
+                </h1>
+              )}
               <h2 className="text-5xl md:text-7xl font-heading font-bold text-white mb-6">
                 {slide.title}
               </h2>
               <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
                 {slide.subtitle}
               </p>
-              <Button className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg px-8 py-6">
+              <Button 
+                className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90 text-lg px-8 py-6"
+                onClick={() => window.location.href = '/contact'}
+              >
                 {slide.cta}
               </Button>
             </div>

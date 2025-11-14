@@ -12,70 +12,88 @@ import heroBeach from '@/assets/hero-beach.jpg';
 const Destinations = () => {
   const allDestinations = [
     {
+      id: 'kenya-safari',
       image: heroSafari,
       title: 'Kenya Safari Experience',
       location: 'Maasai Mara, Kenya',
       description: 'Witness the spectacular Great Migration and encounter the Big Five in one of Africa\'s most renowned wildlife reserves.',
       price: 'From KShs 312,000',
+      link: '/destinations/kenya-safari',
     },
     {
+      id: 'zanzibar-beach',
       image: heroBeach,
       title: 'Zanzibar Beach Paradise',
       location: 'Zanzibar, Tanzania',
       description: 'Relax on pristine white sand beaches, explore spice plantations, and snorkel in crystal-clear turquoise waters.',
       price: 'From KShs 175,000',
+      link: '/destinations/zanzibar-beach',
     },
     {
+      id: 'kilimanjaro-trek',
       image: destMountains,
       title: 'Mount Kilimanjaro Trek',
       location: 'Tanzania',
       description: 'Conquer Africa\'s highest peak with experienced guides on this challenging and rewarding mountain adventure.',
       price: 'From KShs 400,000',
+      link: '/destinations/kilimanjaro-trek',
     },
     {
+      id: 'seychelles-island',
       image: destIsland,
       title: 'Seychelles Island Escape',
       location: 'Seychelles',
       description: 'Experience luxury on stunning tropical islands with world-class resorts, pristine beaches, and exceptional diving.',
       price: 'From KShs 500,000',
+      link: '/destinations/seychelles-island',
     },
     {
+      id: 'marrakech-tour',
       image: destCity,
       title: 'Marrakech Cultural Tour',
       location: 'Morocco',
       description: 'Explore vibrant souks, historic palaces, and authentic Moroccan cuisine in this enchanting ancient city.',
       price: 'From KShs 137,000',
+      link: '/destinations/marrakech-tour',
     },
     {
+      id: 'lamu-coastal',
       image: destCoastal,
       title: 'Coastal Village Retreat',
       location: 'Lamu, Kenya',
       description: 'Discover a tranquil coastal town with centuries-old Swahili architecture and a laid-back island atmosphere.',
       price: 'From KShs 200,000',
+      link: '/destinations/lamu-coastal',
     },
   ];
 
   const recommendedPackages = [
     {
+      id: 'ethiopian-highlands',
       image: destMountains,
       title: 'Highland Expedition',
       location: 'Ethiopian Highlands',
       description: 'Trek through stunning highland terrain with expert guides and experience authentic local culture.',
       price: 'From KShs 262,000',
+      link: '/destinations/ethiopian-highlands',
     },
     {
+      id: 'mauritius-luxury',
       image: destIsland,
       title: 'Mauritius Luxury Package',
       location: 'Mauritius',
       description: 'All-inclusive luxury resort experience with water sports, spa treatments, and gourmet dining.',
       price: 'From KShs 437,000',
+      link: '/destinations/mauritius-luxury',
     },
     {
+      id: 'garden-route',
       image: destCoastal,
       title: 'Coastal Road Trip',
       location: 'South African Coast',
       description: 'Drive the spectacular Garden Route with stops at charming coastal towns and scenic viewpoints.',
       price: 'From KShs 350,000',
+      link: '/destinations/garden-route',
     },
   ];
 
