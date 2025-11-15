@@ -1,6 +1,7 @@
-import { MapPin, Calendar, X } from 'lucide-react';
+import { MapPin, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Poster } from '@/types/poster';
+import { useState } from 'react';
 
 interface PosterDetailModalProps {
   poster: Poster;
@@ -8,15 +9,70 @@ interface PosterDetailModalProps {
 }
 
 const PosterDetailModal = ({ poster, onClose }: PosterDetailModalProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Combine cover image with additional images
+  const allImages = [poster.image, ...(poster.images || [])];
+  
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+  
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
       <div className="bg-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
         <div className="relative">
           <img
-            src={poster.image}
+            src={allImages[currentImageIndex]}
             alt={poster.title}
             className="w-full h-64 md:h-96 object-cover rounded-t-xl"
           />
+          
+          {/* Image Navigation */}
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-background/90 rounded-full hover:bg-background transition-colors"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-16 md:right-20 top-1/2 -translate-y-1/2 p-2 bg-background/90 rounded-full hover:bg-background transition-colors"
+                aria-label="Next image"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+              
+              {/* Image Counter */}
+              <div className="absolute top-4 left-4 px-3 py-1.5 bg-background/90 rounded-full text-sm font-medium">
+                {currentImageIndex + 1} / {allImages.length}
+              </div>
+              
+              {/* Image Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {allImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === currentImageIndex 
+                        ? 'w-8 bg-primary' 
+                        : 'w-2 bg-background/60 hover:bg-background/80'
+                    }`}
+                    aria-label={`Go to image ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-background/90 rounded-full hover:bg-background transition-colors"
