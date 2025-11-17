@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Plane } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import excursiaLogo from '@/assets/excursia-logo.png';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,14 +35,13 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="bg-primary p-2 rounded-full group-hover:scale-110 transition-transform">
-              <Plane className="h-6 w-6 text-primary-foreground" />
-            </div>
+          <Link to="/" className="flex items-center space-x-3 group">
+            <img 
+              src={excursiaLogo} 
+              alt="Excursia Connect" 
+              className="h-16 w-auto group-hover:scale-105 transition-transform"
+            />
             <div>
-              <h1 className={`text-xl font-heading font-semibold ${isScrolled ? 'text-foreground' : 'text-white'}`}>
-                Excursia Connect
-              </h1>
               <p className={`text-xs ${isScrolled ? 'text-muted-foreground' : 'text-white/90'}`}>
                 Epic Travel. Epic Expectations.
               </p>
