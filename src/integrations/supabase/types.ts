@@ -14,7 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      destination_photos: {
+        Row: {
+          created_at: string | null
+          destination_id: string
+          display_order: number | null
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          destination_id: string
+          display_order?: number | null
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string | null
+          destination_id?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_photos_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destinations: {
+        Row: {
+          created_at: string | null
+          date: string
+          description: string
+          id: string
+          location: string | null
+          price: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          description: string
+          id?: string
+          location?: string | null
+          price: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          description?: string
+          id?: string
+          location?: string | null
+          price?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
