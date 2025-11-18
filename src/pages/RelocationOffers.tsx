@@ -182,7 +182,10 @@ const RelocationOffers = () => {
                     ))}
                   </ul>
 
-                  <Button className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button 
+                    className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => window.location.href = 'tel:0724415820'}
+                  >
                     Book Now
                   </Button>
                 </div>

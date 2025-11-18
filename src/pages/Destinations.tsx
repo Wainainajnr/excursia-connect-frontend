@@ -1,5 +1,6 @@
 import Layout from '@/components/Layout';
 import DestinationCard from '@/components/DestinationCard';
+import PosterGrid from '@/components/PosterGrid';
 
 // Import destination images
 import destMountains from '@/assets/destination-mountains.jpg';
@@ -141,6 +142,13 @@ const Destinations = () => {
               <DestinationCard key={index} {...pkg} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Admin Uploaded Destinations */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <PosterGrid />
         </div>
       </section>
     </Layout>

@@ -149,4 +149,15 @@ All colors MUST be HSL.
   .btn-pill {
     @apply px-6 py-3 rounded-full font-medium transition-all duration-300 hover:scale-105 active:scale-95;
   }
+
+  /* Logo transparency blend */
+  .logo-blend {
+    mix-blend-mode: multiply;
+    filter: brightness(1.1);
+  }
+
+  .header-transparent .logo-blend {
+    mix-blend-mode: screen;
+    filter: brightness(1.2) contrast(1.1);
+  }
 }
