@@ -110,7 +110,7 @@ const PosterDetailModal = ({ poster, onClose }: PosterDetailModalProps) => {
             <Button
               className="flex-1 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                window.location.href = '/contact';
+                window.location.href = 'tel:0724415820';
               }}
             >
               Book Now

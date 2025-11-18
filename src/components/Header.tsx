@@ -39,7 +39,7 @@ const Header = () => {
             <img 
               src={excursiaLogo} 
               alt="Excursia Connect" 
-              className="h-16 w-auto group-hover:scale-105 transition-transform"
+              className="h-16 w-auto group-hover:scale-105 transition-transform logo-blend"
             />
             <div>
               <p className={`text-xs ${isScrolled ? 'text-muted-foreground' : 'text-white/90'}`}>
@@ -69,7 +69,7 @@ const Header = () => {
             ))}
             <Button 
               className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              onClick={() => window.location.href = '/contact'}
+              onClick={() => window.location.href = 'tel:0724415820'}
             >
               Book Now
             </Button>
@@ -109,7 +109,7 @@ const Header = () => {
             <div className="px-4">
               <Button 
                 className="btn-pill w-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                onClick={() => window.location.href = '/contact'}
+                onClick={() => window.location.href = 'tel:0724415820'}
               >
                 Book Now
               </Button>

@@ -216,7 +216,7 @@ const DestinationDetail = () => {
               <Button 
                 size="lg" 
                 className="btn-pill bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                onClick={() => navigate('/contact')}
+                onClick={() => window.location.href = 'tel:0724415820'}
               >
                 Book Now
               </Button>
