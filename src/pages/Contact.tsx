@@ -278,8 +278,11 @@ const Contact = () => {
                 <p className="text-white/90 text-sm mb-4">
                   Call us now to speak with one of our travel experts and start planning your dream vacation.
                 </p>
-                <Button className="w-full btn-pill bg-white text-primary hover:bg-white/90">
-                  Call +254 700 000 000
+                <Button 
+                  className="w-full btn-pill bg-white text-primary hover:bg-white/90"
+                  onClick={() => window.location.href = 'tel:+254724415820'}
+                >
+                  Call +254724415820
                 </Button>
               </div>
             </div>
