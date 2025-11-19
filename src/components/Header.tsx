@@ -39,7 +39,7 @@ const Header = () => {
             <img 
               src={excursiaLogo} 
               alt="Excursia Connect" 
-              className="h-16 w-auto group-hover:scale-105 transition-transform logo-blend"
+              className="h-16 w-auto group-hover:scale-105 transition-transform"
             />
             <div>
               <p className={`text-xs ${isScrolled ? 'text-muted-foreground' : 'text-white/90'}`}>
