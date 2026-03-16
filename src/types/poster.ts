@@ -1,11 +1,14 @@
 export interface Poster {
   id: string;
-  image: string; // Primary/cover image
-  images?: string[]; // Additional images (up to 6 total)
+  image: string;
+  images?: string[];
   title: string;
   description: string;
   location?: string;
   date: string;
   price: string;
   createdAt: string;
+  offer?: boolean;
+  offerPrice?: string;
+  originalPrice?: string;
 }

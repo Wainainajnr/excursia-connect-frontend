@@ -53,6 +53,9 @@ export type Database = {
           description: string
           id: string
           location: string | null
+          offer: boolean
+          offer_price: string | null
+          original_price: string | null
           price: string
           title: string
         }
@@ -62,6 +65,9 @@ export type Database = {
           description: string
           id?: string
           location?: string | null
+          offer?: boolean
+          offer_price?: string | null
+          original_price?: string | null
           price: string
           title: string
         }
@@ -71,8 +77,32 @@ export type Database = {
           description?: string
           id?: string
           location?: string | null
+          offer?: boolean
+          offer_price?: string | null
+          original_price?: string | null
           price?: string
           title?: string
+        }
+        Relationships: []
+      }
+      page_settings: {
+        Row: {
+          background_url: string | null
+          id: string
+          page_key: string
+          updated_at: string
+        }
+        Insert: {
+          background_url?: string | null
+          id?: string
+          page_key: string
+          updated_at?: string
+        }
+        Update: {
+          background_url?: string | null
+          id?: string
+          page_key?: string
+          updated_at?: string
         }
         Relationships: []
       }
