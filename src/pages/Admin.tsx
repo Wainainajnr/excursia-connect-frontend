@@ -1,47 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit, Upload, Plus, X, ImagePlus } from 'lucide-react';
+import { Trash2, Edit, Upload, Plus, X, ImagePlus, Settings } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { getPosters, addPoster, updatePoster, deletePoster } from '@/lib/posterStorage';
+import { uploadPageBackground, getPageSettings } from '@/lib/pageSettingsService';
 import { Poster } from '@/types/poster';
 
 const Admin = () => {
   const [posters, setPosters] = useState<Poster[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [formData, setFormData] = useState({ 
-    title: '', 
-    description: '', 
-    location: '', 
-    date: '', 
-    price: '', 
-    image: '',
-    images: [] as string[]
+  const [showBackgroundSettings, setShowBackgroundSettings] = useState(false);
+  const [backgroundUploading, setBackgroundUploading] = useState<string | null>(null);
+  const [pageBackgrounds, setPageBackgrounds] = useState<Record<string, string | null>>({});
+  const [formData, setFormData] = useState({
+    title: '', description: '', location: '', date: '', price: '', image: '', images: [] as string[],
+    offer: false, offerPrice: '', originalPrice: '',
   });
-  const [multiFormData, setMultiFormData] = useState<Array<{ 
-    title: string; 
-    description: string; 
-    location: string; 
-    date: string; 
-    price: string; 
-    image: string;
-    images: string[];
+  const [multiFormData, setMultiFormData] = useState<Array<{
+    title: string; description: string; location: string; date: string; price: string; image: string; images: string[];
+    offer: boolean; offerPrice: string; originalPrice: string;
   }>>([]);
 
   useEffect(() => { setPosters(getPosters()); }, []);
-  useEffect(() => { 
-    setMultiFormData(Array(6).fill(null).map(() => ({ 
-      title: '', 
-      description: '', 
-      location: '', 
-      date: '', 
-      price: '', 
-      image: '',
-      images: []
-    }))); 
+  useEffect(() => {
+    setMultiFormData(Array(6).fill(null).map(() => ({
+      title: '', description: '', location: '', date: '', price: '', image: '', images: [],
+      offer: false, offerPrice: '', originalPrice: '',
+    })));
+  }, []);
+  useEffect(() => {
+    getPageSettings().then(setPageBackgrounds);
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
@@ -63,65 +55,41 @@ const Admin = () => {
 
   const handleAdditionalImagesUpload = (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
     const files = e.target.files;
-    if (files) {
-      const isEditMode = index === undefined;
-      const currentImages = isEditMode ? formData.images : multiFormData[index!].images;
-      
-      if (currentImages.length >= 6) {
-        toast.error('Maximum of 6 photos reached.');
-        return;
-      }
+    if (!files) return;
+    const isEditMode = index === undefined;
+    const currentImages = isEditMode ? formData.images : multiFormData[index!].images;
+    if (currentImages.length >= 6) { toast.error('Maximum of 6 photos reached.'); return; }
+    const remainingSlots = 6 - currentImages.length;
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    if (filesToProcess.length < files.length) toast.warning(`Only ${filesToProcess.length} photos added. Maximum of 6 photos allowed.`);
 
-      const remainingSlots = 6 - currentImages.length;
-      const filesToProcess = Array.from(files).slice(0, remainingSlots);
-
-      if (filesToProcess.length < files.length) {
-        toast.warning(`Only ${filesToProcess.length} photos added. Maximum of 6 photos allowed.`);
-      }
-
-      let processed = 0;
-      const newImages: string[] = [];
-
-      filesToProcess.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          newImages.push(reader.result as string);
-          processed++;
-
-          if (processed === filesToProcess.length) {
-            if (isEditMode) {
-              setFormData(prev => ({ 
-                ...prev, 
-                images: [...prev.images, ...newImages] 
-              }));
-            } else {
-              const newData = [...multiFormData];
-              newData[index!] = { 
-                ...newData[index!], 
-                images: [...newData[index!].images, ...newImages] 
-              };
-              setMultiFormData(newData);
-            }
-            toast.success(`${newImages.length} photo(s) added!`);
+    let processed = 0;
+    const newImages: string[] = [];
+    filesToProcess.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newImages.push(reader.result as string);
+        processed++;
+        if (processed === filesToProcess.length) {
+          if (isEditMode) setFormData(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
+          else {
+            const newData = [...multiFormData];
+            newData[index!] = { ...newData[index!], images: [...newData[index!].images, ...newImages] };
+            setMultiFormData(newData);
           }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+          toast.success(`${newImages.length} photo(s) added!`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeAdditionalImage = (imageIndex: number, formIndex?: number) => {
     if (formIndex === undefined) {
-      setFormData(prev => ({
-        ...prev,
-        images: prev.images.filter((_, i) => i !== imageIndex)
-      }));
+      setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== imageIndex) }));
     } else {
       const newData = [...multiFormData];
-      newData[formIndex] = {
-        ...newData[formIndex],
-        images: newData[formIndex].images.filter((_, i) => i !== imageIndex)
-      };
+      newData[formIndex] = { ...newData[formIndex], images: newData[formIndex].images.filter((_, i) => i !== imageIndex) };
       setMultiFormData(newData);
     }
   };
@@ -130,80 +98,105 @@ const Admin = () => {
     e.preventDefault();
     const validForms = multiFormData.filter(f => f.title.trim() && f.description.trim() && f.price.trim() && f.image);
     if (validForms.length === 0) { toast.error('Please fill out at least one poster'); return; }
-    validForms.forEach(f => addPoster({ 
-      ...f, 
-      title: f.title.trim(), 
-      description: f.description.trim(), 
-      location: f.location.trim(), 
-      date: f.date || new Date().toLocaleDateString(), 
-      price: f.price.trim(),
-      images: f.images
+
+    for (const f of validForms) {
+      if (f.offer && (!f.offerPrice.trim() || !f.originalPrice.trim())) {
+        toast.error(`Offer "${f.title}" requires both Offer Price and Original Price`);
+        return;
+      }
+    }
+
+    validForms.forEach(f => addPoster({
+      ...f, title: f.title.trim(), description: f.description.trim(), location: f.location.trim(),
+      date: f.date || new Date().toLocaleDateString(), price: f.price.trim(), images: f.images,
+      offer: f.offer, offerPrice: f.offerPrice.trim(), originalPrice: f.originalPrice.trim(),
     }));
     toast.success(`Added ${validForms.length} poster(s)!`);
     setPosters(getPosters());
-    setMultiFormData(Array(6).fill(null).map(() => ({ 
-      title: '', 
-      description: '', 
-      location: '', 
-      date: '', 
-      price: '', 
-      image: '',
-      images: []
+    setMultiFormData(Array(6).fill(null).map(() => ({
+      title: '', description: '', location: '', date: '', price: '', image: '', images: [],
+      offer: false, offerPrice: '', originalPrice: '',
     })));
     setShowUploadForm(false);
   };
 
-  const handleEdit = (poster: Poster) => { 
-    setEditingId(poster.id); 
-    setFormData({ 
-      title: poster.title, 
-      description: poster.description, 
-      location: poster.location || '', 
-      date: poster.date, 
-      price: poster.price, 
-      image: poster.image,
-      images: poster.images || []
-    }); 
-    setShowUploadForm(true); 
+  const handleEdit = (poster: Poster) => {
+    setEditingId(poster.id);
+    setFormData({
+      title: poster.title, description: poster.description, location: poster.location || '',
+      date: poster.date, price: poster.price, image: poster.image, images: poster.images || [],
+      offer: poster.offer || false, offerPrice: poster.offerPrice || '', originalPrice: poster.originalPrice || '',
+    });
+    setShowUploadForm(true);
   };
 
-  const handleUpdate = (e: React.FormEvent) => { 
-    e.preventDefault(); 
-    if (!formData.title.trim() || !formData.description.trim() || !formData.price.trim()) { 
-      toast.error('Fill required fields'); 
-      return; 
-    } 
-    if (editingId) { 
-      updatePoster(editingId, formData); 
-      toast.success('Updated!'); 
-      setEditingId(null); 
-    } 
-    setPosters(getPosters()); 
-    setFormData({ 
-      title: '', 
-      description: '', 
-      location: '', 
-      date: '', 
-      price: '', 
-      image: '',
-      images: []
-    }); 
-    setShowUploadForm(false); 
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.description.trim() || !formData.price.trim()) { toast.error('Fill required fields'); return; }
+    if (formData.offer && (!formData.offerPrice.trim() || !formData.originalPrice.trim())) {
+      toast.error('Offer Price and Original Price are required for offers'); return;
+    }
+    if (editingId) { updatePoster(editingId, formData); toast.success('Updated!'); setEditingId(null); }
+    setPosters(getPosters());
+    setFormData({ title: '', description: '', location: '', date: '', price: '', image: '', images: [], offer: false, offerPrice: '', originalPrice: '' });
+    setShowUploadForm(false);
   };
 
-  const handleDelete = (id: string) => { 
-    if (confirm('Delete?')) { 
-      deletePoster(id); 
-      setPosters(getPosters()); 
-      toast.success('Deleted!'); 
-    } 
+  const handleDelete = (id: string) => {
+    if (confirm('Delete?')) { deletePoster(id); setPosters(getPosters()); toast.success('Deleted!'); }
   };
 
-  const handleMultiChange = (i: number, field: string, value: string) => { 
-    const newData = [...multiFormData]; 
-    newData[i] = { ...newData[i], [field]: value }; 
-    setMultiFormData(newData); 
+  const handleMultiChange = (i: number, field: string, value: string | boolean) => {
+    const newData = [...multiFormData];
+    newData[i] = { ...newData[i], [field]: value };
+    setMultiFormData(newData);
   };
+
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>, pageKey: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBackgroundUploading(pageKey);
+    const url = await uploadPageBackground(file, pageKey);
+    if (url) {
+      setPageBackgrounds(prev => ({ ...prev, [pageKey]: url }));
+      toast.success(`Background updated for ${pageKey.replace('_', ' ')}!`);
+    } else {
+      toast.error('Failed to upload background');
+    }
+    setBackgroundUploading(null);
+  };
+
+  const OfferToggle = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
+    <div className="flex items-center gap-3">
+      <label className="text-sm font-medium">Is this an offer?</label>
+      <button type="button" onClick={() => onChange(!checked)}
+        className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-accent' : 'bg-muted-foreground/30'}`}>
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${checked ? 'translate-x-6' : ''}`} />
+      </button>
+      <span className="text-xs text-muted-foreground">{checked ? 'Yes' : 'No'}</span>
+    </div>
+  );
+
+  const OfferFields = ({ offerPrice, originalPrice, onChange }: {
+    offerPrice: string; originalPrice: string; onChange: (field: string, value: string) => void;
+  }) => (
+    <div className="grid grid-cols-2 gap-4 p-4 bg-accent/5 rounded-lg border border-accent/20">
+      <div>
+        <label className="block text-xs font-medium mb-1">Offer Price *</label>
+        <Input value={offerPrice} onChange={e => onChange('offerPrice', e.target.value)} placeholder="KShs 150,000" className="text-xs" />
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1">Original Price *</label>
+        <Input value={originalPrice} onChange={e => onChange('originalPrice', e.target.value)} placeholder="KShs 200,000" className="text-xs" />
+      </div>
+    </div>
+  );
+
+  const backgroundPages = [
+    { key: 'relocation_background', label: 'Relocation Page' },
+    { key: 'offers_background', label: 'Offers Page' },
+    { key: 'about_background', label: 'About Page' },
+  ];
 
   return (
     <Layout>
@@ -212,12 +205,40 @@ const Admin = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-heading font-bold mb-4">Admin Dashboard</h1>
-              <p className="text-muted-foreground">Manage posters</p>
+              <p className="text-muted-foreground">Manage posters & site settings</p>
             </div>
-            <Button className="btn-pill" onClick={() => { setShowUploadForm(true); setEditingId(null); }}>
-              <Plus className="h-5 w-5 mr-2" />Add Posters
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="outline" className="btn-pill" onClick={() => setShowBackgroundSettings(!showBackgroundSettings)}>
+                <Settings className="h-5 w-5 mr-2" />Backgrounds
+              </Button>
+              <Button className="btn-pill" onClick={() => { setShowUploadForm(true); setEditingId(null); }}>
+                <Plus className="h-5 w-5 mr-2" />Add Posters
+              </Button>
+            </div>
           </div>
+
+          {/* Background Settings */}
+          {showBackgroundSettings && (
+            <div className="bg-card p-8 rounded-xl shadow-lg mb-12">
+              <h2 className="text-2xl font-heading font-bold mb-6">Page Background Images</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                {backgroundPages.map(bp => (
+                  <div key={bp.key} className="bg-muted p-4 rounded-lg space-y-3">
+                    <h3 className="font-semibold text-sm">{bp.label}</h3>
+                    {pageBackgrounds[bp.key] && (
+                      <img src={pageBackgrounds[bp.key]!} alt={bp.label} className="w-full h-32 object-cover rounded-lg" />
+                    )}
+                    <label className="cursor-pointer block">
+                      <Button type="button" size="sm" className="w-full" disabled={backgroundUploading === bp.key} asChild>
+                        <span>{backgroundUploading === bp.key ? 'Uploading...' : 'Upload Background'}</span>
+                      </Button>
+                      <input type="file" accept="image/*" className="hidden" onChange={e => handleBackgroundUpload(e, bp.key)} />
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {showUploadForm && (
             <div className="bg-card p-8 rounded-xl shadow-lg mb-12">
@@ -230,53 +251,26 @@ const Admin = () => {
                   <div>
                     <label className="block text-sm font-medium mb-2">Cover Image *</label>
                     <Input type="file" accept="image/*" onChange={handleImageUpload} />
-                    {formData.image && (
-                      <img src={formData.image} alt="Preview" className="w-32 h-32 object-cover rounded-lg mt-2" />
-                    )}
+                    {formData.image && <img src={formData.image} alt="Preview" className="w-32 h-32 object-cover rounded-lg mt-2" />}
                   </div>
 
-                  {/* Additional Images Section */}
                   <div className="border-t pt-6">
                     <div className="flex items-center justify-between mb-4">
-                      <label className="block text-sm font-medium">
-                        Additional Photos ({formData.images.length}/6)
-                      </label>
+                      <label className="block text-sm font-medium">Additional Photos ({formData.images.length}/6)</label>
                       {formData.images.length < 6 && (
                         <label className="cursor-pointer">
-                          <Button type="button" size="sm" asChild>
-                            <span>
-                              <ImagePlus className="h-4 w-4 mr-2" />
-                              Upload Photos (max 6)
-                            </span>
-                          </Button>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={handleAdditionalImagesUpload}
-                          />
+                          <Button type="button" size="sm" asChild><span><ImagePlus className="h-4 w-4 mr-2" />Upload Photos (max 6)</span></Button>
+                          <input type="file" accept="image/*" multiple className="hidden" onChange={handleAdditionalImagesUpload} />
                         </label>
                       )}
-                      {formData.images.length >= 6 && (
-                        <span className="text-sm text-muted-foreground">Maximum of 6 photos reached.</span>
-                      )}
                     </div>
-
                     {formData.images.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {formData.images.map((img, idx) => (
                           <div key={idx} className="relative group">
-                            <img
-                              src={img}
-                              alt={`Additional ${idx + 1}`}
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeAdditionalImage(idx)}
-                              className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
+                            <img src={img} alt={`Additional ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                            <button type="button" onClick={() => removeAdditionalImage(idx)}
+                              className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <X className="h-4 w-4" />
                             </button>
                           </div>
@@ -285,31 +279,25 @@ const Admin = () => {
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Title *</label>
-                    <Input value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} required />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description *</label>
-                    <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={4} required />
-                  </div>
-
+                  <div><label className="block text-sm font-medium mb-2">Title *</label>
+                    <Input value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} required /></div>
+                  <div><label className="block text-sm font-medium mb-2">Description *</label>
+                    <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={4} required /></div>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Location</label>
-                      <Input value={formData.location} onChange={e => setFormData(p => ({ ...p, location: e.target.value }))} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Date</label>
-                      <Input value={formData.date} onChange={e => setFormData(p => ({ ...p, date: e.target.value }))} />
-                    </div>
+                    <div><label className="block text-sm font-medium mb-2">Location</label>
+                      <Input value={formData.location} onChange={e => setFormData(p => ({ ...p, location: e.target.value }))} /></div>
+                    <div><label className="block text-sm font-medium mb-2">Date</label>
+                      <Input value={formData.date} onChange={e => setFormData(p => ({ ...p, date: e.target.value }))} /></div>
                   </div>
+                  <div><label className="block text-sm font-medium mb-2">Price *</label>
+                    <Input value={formData.price} onChange={e => setFormData(p => ({ ...p, price: e.target.value }))} placeholder="From KShs..." required /></div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Price *</label>
-                    <Input value={formData.price} onChange={e => setFormData(p => ({ ...p, price: e.target.value }))} placeholder="From KShs..." required />
-                  </div>
+                  {/* Offer Toggle */}
+                  <OfferToggle checked={formData.offer} onChange={v => setFormData(p => ({ ...p, offer: v }))} />
+                  {formData.offer && (
+                    <OfferFields offerPrice={formData.offerPrice} originalPrice={formData.originalPrice}
+                      onChange={(field, value) => setFormData(p => ({ ...p, [field]: value }))} />
+                  )}
 
                   <div className="flex gap-4">
                     <Button type="submit" className="flex-1">Update</Button>
@@ -322,32 +310,20 @@ const Admin = () => {
                     {multiFormData.map((f, i) => (
                       <div key={i} className="bg-muted p-4 rounded-lg space-y-3">
                         <h3 className="font-semibold">Destination {i + 1}</h3>
-                        
                         <div>
                           <label className="text-xs text-muted-foreground">Cover Image</label>
                           <Input type="file" accept="image/*" onChange={e => handleImageUpload(e, i)} className="text-xs" />
                           {f.image && <img src={f.image} alt="" className="w-full h-24 object-cover rounded mt-2" />}
                         </div>
-
-                        {/* Additional Images for Multi Upload */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <label className="text-xs text-muted-foreground">Photos ({f.images.length}/6)</label>
                             {f.images.length < 6 && (
                               <label className="cursor-pointer">
                                 <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-xs" asChild>
-                                  <span>
-                                    <ImagePlus className="h-3 w-3 mr-1" />
-                                    Add
-                                  </span>
+                                  <span><ImagePlus className="h-3 w-3 mr-1" />Add</span>
                                 </Button>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  multiple
-                                  className="hidden"
-                                  onChange={e => handleAdditionalImagesUpload(e, i)}
-                                />
+                                <input type="file" accept="image/*" multiple className="hidden" onChange={e => handleAdditionalImagesUpload(e, i)} />
                               </label>
                             )}
                           </div>
@@ -356,11 +332,8 @@ const Admin = () => {
                               {f.images.map((img, idx) => (
                                 <div key={idx} className="relative group">
                                   <img src={img} alt="" className="w-full h-16 object-cover rounded" />
-                                  <button
-                                    type="button"
-                                    onClick={() => removeAdditionalImage(idx, i)}
-                                    className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
+                                  <button type="button" onClick={() => removeAdditionalImage(idx, i)}
+                                    className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <X className="h-3 w-3" />
                                   </button>
                                 </div>
@@ -368,20 +341,23 @@ const Admin = () => {
                             </div>
                           )}
                         </div>
-
                         <Input value={f.title} onChange={e => handleMultiChange(i, 'title', e.target.value)} placeholder="Title" className="text-xs" />
                         <Textarea value={f.description} onChange={e => handleMultiChange(i, 'description', e.target.value)} placeholder="Description" rows={2} className="text-xs" />
                         <Input value={f.location} onChange={e => handleMultiChange(i, 'location', e.target.value)} placeholder="Location" className="text-xs" />
                         <Input value={f.date} onChange={e => handleMultiChange(i, 'date', e.target.value)} placeholder="Date" className="text-xs" />
                         <Input value={f.price} onChange={e => handleMultiChange(i, 'price', e.target.value)} placeholder="KShs" className="text-xs" />
+
+                        {/* Offer Toggle */}
+                        <OfferToggle checked={f.offer} onChange={v => handleMultiChange(i, 'offer', v)} />
+                        {f.offer && (
+                          <OfferFields offerPrice={f.offerPrice} originalPrice={f.originalPrice}
+                            onChange={(field, value) => handleMultiChange(i, field, value)} />
+                        )}
                       </div>
                     ))}
                   </div>
-
                   <div className="flex gap-4">
-                    <Button type="submit" className="flex-1">
-                      <Upload className="h-4 w-4 mr-2" />Upload All
-                    </Button>
+                    <Button type="submit" className="flex-1"><Upload className="h-4 w-4 mr-2" />Upload All</Button>
                     <Button type="button" variant="outline" className="flex-1" onClick={() => setShowUploadForm(false)}>Cancel</Button>
                   </div>
                 </form>
@@ -392,36 +368,35 @@ const Admin = () => {
           <div>
             <h2 className="text-2xl font-heading font-bold mb-6">Destinations ({posters.length})</h2>
             {posters.length === 0 ? (
-              <div className="bg-muted p-12 rounded-xl text-center">
-                <p className="text-muted-foreground">No destinations yet.</p>
-              </div>
+              <div className="bg-muted p-12 rounded-xl text-center"><p className="text-muted-foreground">No destinations yet.</p></div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {posters.map(p => (
                   <div key={p.id} className="bg-card rounded-xl overflow-hidden shadow-lg">
                     <div className="relative h-48">
                       <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
-                      <div className="absolute top-3 right-3 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                        {p.price}
-                      </div>
+                      <div className="absolute top-3 right-3 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">{p.price}</div>
+                      {p.offer && (
+                        <div className="absolute top-3 left-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">OFFER</div>
+                      )}
                       {p.images && p.images.length > 0 && (
-                        <div className="absolute bottom-3 left-3 bg-background/80 text-foreground px-2 py-1 rounded-full text-xs">
-                          +{p.images.length} photos
-                        </div>
+                        <div className="absolute bottom-3 left-3 bg-background/80 text-foreground px-2 py-1 rounded-full text-xs">+{p.images.length} photos</div>
                       )}
                     </div>
                     <div className="p-4">
                       <h3 className="font-heading font-semibold text-lg mb-2 line-clamp-1">{p.title}</h3>
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{p.description}</p>
                       {p.location && <p className="text-xs text-muted-foreground mb-2">📍 {p.location}</p>}
+                      {p.offer && p.offerPrice && p.originalPrice && (
+                        <div className="flex items-baseline gap-2 mb-2">
+                          <span className="text-sm font-bold text-primary">{p.offerPrice}</span>
+                          <span className="text-xs text-muted-foreground line-through">{p.originalPrice}</span>
+                        </div>
+                      )}
                       <p className="text-xs text-accent mb-4">{p.date}</p>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(p)}>
-                          <Edit className="h-4 w-4 mr-1" />Edit
-                        </Button>
-                        <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(p.id)}>
-                          <Trash2 className="h-4 w-4 mr-1" />Delete
-                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(p)}><Edit className="h-4 w-4 mr-1" />Edit</Button>
+                        <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4 mr-1" />Delete</Button>
                       </div>
                     </div>
                   </div>
